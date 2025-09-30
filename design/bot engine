@@ -1,0 +1,26 @@
+I wonder if I can use inkle?
+yup, I totally can
+in fact there's even a js port of it!
+https://github.com/y-lohse/inkjs
+
+so the only thing I have to worry about is saving / loading data into ink
+maybe.
+I can also probably also extend ink by just checking anything it returns for my own special markup/merge fields.
+Better yet, ink supports 'tagging' which does nothing in the engine, but you can get the tags out of the engine.
+
+So perhaps a grammar like
+command(param?) result_action target
+so for example
+# capture set priority
+means present a text box and save the result into the 'priority' variable
+# list(priorities) set priority
+means present a set of choices based on the 'priorities' list (kept outside of ink) and then save the results into the 'priority' variable in ink
+# capture append priorities
+means present a textbox and add the result to the priorities list
+# list(priorities) remove priorities
+means present the list of priorities as options and remove whichever is selected from the priorities list
+# run(function)
+means run a js function named function
+
+Another thing to consider is if I want to just use inkjs for the whole thing or if I want to use it for each conversation and build the non-conversation parts in js directly?
+Considering how much custom stuff I'm building already I don't know if it'd be worth it.

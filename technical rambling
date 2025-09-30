@@ -1,0 +1,19 @@
+so, it looks like inkjs doesn't handle tags? like, it doesn't return them from the story object.
+
+also, ink itself has no way to recieve input from the player.
+I could take the text on the app side, set and ink variable and then the story would be able to continue using the value that I set.
+
+there is similarly no way I know of to have ink return a different number of options.
+like there are threads, which maybe could be combined with conditionals to keep accruing more options, but that's like not super helpful if the options themselves need to be varied.
+like, the options could take values from variables, but again, not great really. You'd have to have a variable defined ahead of time.
+
+so I could have priority_1 through priority_10 defined, then check if they're empty and have them show or hide as appropriate, and if I combined this with storing responses in a global variable I could maybe get inkle to handle variable numbers of user-supplied text. But like, it feels like I'd be doing a lot to make that happen and really it isn't worthwhile since I need to store user-supplied information externally anyway so that it persists between sessions.
+
+So if I figure out how to get ink to return markup to me then I can catch it and know to either fetch custom user data and store it, or to render a specific list of options and store the selection.
+
+man, if only ink lists were dynamic, then I could just use those.
+
+all of this makes me think that maybe ink isn't worth it. In the end I really should get this onto phones so I can do notifications. Like browsers have those, but I can't imagine anyone uses them. Besides, we're always carrying phones in our hands, not laptops.
+nevermind, I can use cordova/electron to get this app wherever I need it without issue (and while using html, css, and javascript, and therefore inkjs is still on the table as an option.)
+
+also, I bet cordova has a built in webserver so I can undo my www-data changes

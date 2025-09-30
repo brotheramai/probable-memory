@@ -1,0 +1,85 @@
+so what I want is a program that helps you set your plans / priorities
+then helps you plan out your life and keeps you honest.
+
+the goal is not to shame you or be a productivity app the goal is 
+to help you recognize when what you want and do are out of sync.
+
+I also really want it to keep reciepts for you so that when you
+use a bullshit excuse it can call you on it.
+so when you're like "I just don't have time" it can be like
+"well actually".
+but again not to shame you, more to make you recognize when 
+what you want is out of alignment with your reality.
+so for example if you keep using the "I don't have time" excuse
+but also it knows you watched a bunch of anime it can be like
+"maybe you have impulse control issues, here are resources"
+or "maybe you would have better luck if you acknowledged your anime
+habit and planned around it"
+or "maybe you need more time to unwind than you realize? Can you
+improve your sleep, add exercize, or remove stress from your life?"
+or "maybe you could replace your anime habit with something else
+that you don't think is a waste of time?"
+
+sort of a separate thought, but maybe asking about big life changes
+and then letting you know about additional new responsibilities
+e.g.
+I bought a house -> does it have a furnace? -> you should get it 
+checked every x years / should replace the filter
+and then it would help you schedule actually doing these things
+
+
+Hardware architecture
+
+I'm thinking it's just a tiny HTML file and a bunch of javascript with no real server / domain name behind it.
+This could mean the whole app is jmust a specific github URL, or a specific jsdelivr URL.
+
+Software architecture
+
+So again I'm thinking it's just a website with a URL and that every part of it runs locally. That is to say that it uses permanent storage in the browser and/or on the filesystem and DOES NOT ever commmunicate with a server/backend. Investigate https://developer.mozilla.org/en-US/docs/Web/API/Storage_API more thoroughly. If I go that route then I may not be able to use github/jsdelivr as my hosting solution. I also don't know how secure this is.
+
+I want the data at rest to be encrypted using a decent encryption key salted with a user-provided password. Then when you load the site it'll be like "password please" and use the provided password to attempt decryption.
+
+Features
+
+I want to start with the prioritization / check-in / accountabilibuddy features.
+
+So it asks you what your priorities are.
+Then daily it asks you what you did today and asks you to link those activities to your priorities.
+Weekly it will check that the things that you do match the things you say are important and will ask you what's going on if it detects a mismatch.
+
+When I say it will "ask you what's going on" I mean stuff like:
+"You said X is important to you, but you didn't do anything for X this week, why not?"
+and it will give you options like
+"I couldn't find the time"
+"something came up"
+"I decided to prioritize other things"
+"custom"
+
+The point being that it will track your excuses over time and confront you with the data.
+So the third time you say "I decided to prioritize something else" it'll be like, "you keep prioritizing Y over X, so let's review your list of priorities". Or "Things keep coming up. Why is your life so unpredictable?" followed by "what are some actions you could take to make your life more predictable?" and so on.
+The software itself should never suggest a course of action that you should take outside of the software. So for example it will say things like "let's adjust your priorities", but it won't say things like "you should quit your kayaking club because it takes up too much of your time."
+The real intention is to help the user get a clear idea of the differences beween their stated priorities and how they actually act. We want to encourage mindfulness and provide a dedicated time for self reflaction that comes from 'outside' of the user. To my mind a user saying 'I wanted to do X, but I realized I wasn't willing to make the changes necessay to do the things required to make X a reality, so 
+I accepted that i was never going to do X and focused my energies elsewhere" is just as much a success as a user saying "I realized 
+i was spending a lot of time on Y even though it isn't important to me, so I stopped doing Y and started doing X instead." is as much a success as "When I looked back on the year I realized gosh, I just make excuses all the time. Nothing is going to happen if I don't do it. And so I still make excuses a lot and I'm still not getting much done, but now I'm aware of it and I can start working on it."
+Or put another way, the goal is to increase alignment beween a user's beliefs about themselves and their priorities and their reality.
+
+I also want to have a featureset where it helps you handle certain adulting tasks. E.g. remembering to call / send cards for a birthday. Remembering to mow the lawn, or do laundry, etc.
+When you tell it about your week it'll also recognize things like: "I bought a house." or "I went on a date" and remember these (potentailly) important dates for you. Further it will ask some follow up questions and keep track of important information for you. For example, if you buy a house it'll ask things like "what kind of heat" and then have you schedule recurring tasks like "replace the furnace filter" (and of course it will remember what size filter you need for you.)
+
+Software architecture.
+
+So I want to make this thing as configuration driven as possible. I think I will need:
+	A system for 'having a chat'
+	The ability to choose options
+	The whole encryption mess
+	Remembering important information
+	Follow-up tasks
+	Interviews
+	Reviewing/displaying past information
+	A ui for ranking / ordering things
+	A ui for matching activities to priorities
+	
+I wonder if I should encorporate inkle?
+Like, I'm probably going to need that level of logic in the 'conversations'.
+And inkle is already entirely configuration based.
+	

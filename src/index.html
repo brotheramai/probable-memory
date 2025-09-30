@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <script src="https://unpkg.com/inkjs@2.3.2/dist/ink.js"></script>
+    <script src="story.js"></script>
+</head>
+<body>
+    <div id="story"></div>
+    <script>
+        var story = new inkjs.Story(storyContent);
+        var storyContainer = document.getElementById('story');
+
+        function continueStory(){
+            var lastTags = [];
+            while(story.canContinue){
+                var p = document.createElement('p');
+                p.innerText = story.Continue();
+                lastTags = story.currentTags;
+                console.log(lastTags);
+                if(lastTags.length > 0){
+                    processTags(lastTags[0]);
+                    return;
+                }
+                storyContainer.appendChild(p);
+            }
+            story.currentChoices.forEach(c => {
+                var b = document.createElement("button");
+                b.value = c.text;
+                b.innerText = c.text;
+                b.setAttribute('data-index',c.index);
+                storyContainer.appendChild(b);
+                b.addEventListener("click",e=>{
+                    story.ChooseChoiceIndex(e.target.getAttribute('data-index'));
+                    continueStory();
+                });
+            });
+            storyContainer.append(document.createElement('br'));
+        }
+        continueStory();
+        var $ = {
+            'variables':{
+                'priority':'',
+                'priorities':['a','b','c']
+            },
+            test:()=>{console.log('wow');}};
+
+
+        function processTags(tagsraw){
+            var command;
+            var command_param;
+            var action;
+            var target;
+            (tagsraw => {
+                var tags = tagsraw.split(' ');
+            
+                if(tags.length<1){
+                    return;
+                }
+                var params = tags[0].matchAll(/(.*?)\((.*?)\)/g).next();
+                if(params.value){
+                    command = params.value[1];
+                    command_param = params.value[2];
+                }
+                else{
+                    command = tags[0];
+                }
+                if(tags.length<2){
+                    return;
+                }
+                action = tags[1];
+                if(tags.length<3){
+                    return;
+                }
+                target = tags[2];
+            })(tagsraw);
+            var action = processAction(action,target);
+            switch(command){
+                case 'capture':
+                    if(command_param){
+                        console.error(`invalid argument ${command_param}, capture takes no arguments`);
+                        return;
+                    }
+                    var i = document.createElement('input');
+                    storyContainer.append(i);
+                    i.addEventListener('change',(e)=>{
+                        action(e.target.value)
+                    });
+                    return;
+                case 'list':
+                    if(!command_param){
+                        console.error('list requires an argument');
+                        return;
+                    }
+                    if(!$.variables.hasOwnProperty(command_param)){
+                        console.error(`could not find variable ${command_param}`);
+                        return;
+                    }
+                    $.variables[command_param].forEach(l=>{
+                        var b = document.createElement("button");
+                        b.value = l;
+                        b.innerText = l;
+                        b.setAttribute('data-index',0);
+                        storyContainer.appendChild(b);
+                        b.addEventListener("click",action);
+                    });
+                    return;
+                case 'run':
+                    if(!$.hasOwnProperty(command_param)){
+                        console.error(`no such function ${command_param}`);
+                        return
+                    }
+                    $[command_param]();
+                    return;
+            }
+        }
+        function set(target){
+            return (val)=>{
+                $.variables[target]=val;
+            }
+        }
+
+        function setInk(target){
+            return (val)=>{
+                story.variablesState[target]=val;
+            }
+        }
+
+        function append(target){
+            return (val)=>{
+                $.variables[target].push(val.target.value);
+            }
+        }
+        function remove(target){
+            return (val)=>{
+                $.variables[target].splice($.variables[target].indexOf(val.target.value),1);
+            }
+        }
+
+        function processAction(action, target){
+            switch(action){
+                case 'set':
+                    if(!$.variables.hasOwnProperty(target)){
+                        console.error(`invalid target ${target} for set action`);
+                        return;
+                    }
+                    return set(target);
+                case 'set_ink':
+                    if(story.variablesState[target]==null){
+                        console.error(`invalid target ${target} for set_ink action`);
+                        return;
+                    }
+                    return setInk(target);
+                case 'append':
+                    if(!$.variables.hasOwnProperty(target)){
+                        console.error(`invalid target ${target} for append action`);
+                        return;
+                    }
+                    if(!('push' in $.variables[target])){
+                        console.error(`${target} is not a valid target. append must target a list`);
+                        return;
+                    }
+                    return append(target);
+                case 'remove':
+                    if(!$.variables.hasOwnProperty(target)){
+                        console.error(`invalid target ${target} for remove action`);
+                        return;
+                    }
+                    if(!('splice' in $.variables[target] &&
+                        ('indexOf' in $.variables[target]))){
+                        console.error(`${target} is not a valid target. remove must target a list`);
+                        return;
+                    }
+                    return remove(target);
+            }
+        }
+    </script>
+</body>
+
+</html>

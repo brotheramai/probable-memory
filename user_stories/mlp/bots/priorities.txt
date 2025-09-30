@@ -1,0 +1,73 @@
+First conversation.
+
+'Ok let's work through your priorities. Send them to me one at a time and let me know when you're ready for the next step. Don't worry about putting them in order or being too specific yet, just give me the gist of them.'
+
+> 'Ok, let's move on.'
+
+'Great start. Now send them to me again in the correct order.'
+
+> 'The text of the first priority you entered.'
+> 'The text of the second priority you entered.'
+...
+> 'They're ordered now.'
+
+'Excellent! Now that we know what your priorities are how about a change of pace.'
+
+[Daily check-in]
+What did you do today?' 
+
+(after each message)
+
+'And does that contribute to any of your priorities?'
+> 'The text of the first priority you entered.'
+> 'The text of the second priority you entered.'
+...
+> 'Nope'
+
+(alternatively entering another activity will implicitly select 'nope')
+
+(after picking a category)
+> 'That's all I did today'
+
+'Thanks for sharing. I'll check in with you tomorrow!'
+
+
+Any unprompted conversation.
+> 'I'd like to work on my priorities' 
+(goes to edit conversation)
+> 'I've get stuff to report'
+(goes to daily check-in)
+> 'How am I doing?'
+(goes to weekly report)
+
+[Edit conversation]
+
+'Which priority would you like to edit?'
+> 'The text of the first priority you entered.'
+> 'The text of the second priority you entered.'
+...
+> 'Nevermind.'
+
+'Ok, and what should it say?'
+
+(after response go to edit conversation)
+
+[Weekly check-in]
+
+(lists priorities by # of activities throughout the week, e.g.)
+'17 activities, #1. Work'
+'10 activities, #5. Relax'
+'8 activities, #2. Socialize'
+'5 activities, #4. Network'
+'2 activities, #3. Exercise'
+
+(if anything is more than 1 out of place)
+'Woah what happened with (priority here)'
+(if most things are out of place)
+'Well that didn't go to plan!'
+(if you get a 'bad grade' for an entire month)
+'Your actions and your priorities are consistently out of whack. You might need to review your priorities, it's natural for them to shift over time. For example when life gets more stressful you might need to make relaxation / self-care / family-life a higher priority.'
+(otherwise)
+'Nice work!'
+
+##In the future I'd like to extend this to remembering your excuses and putting them as suggested responses. Then if you use one too often be like 'You say that a lot. What would you need to do to make a change?'

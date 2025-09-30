@@ -1,0 +1,4 @@
+The user will see a list of available contacts. Contacts that you have open conversations with will display at the top in a list of 'favorite' contacts. Contacts that you have not previously spoken to will be displayed in a separate section below the favorite contacts.
+Selecting a contact will open a collapsible section under the contact that shows the contact's bio.
+At the bottom of the screen will be a text prompt. Once the text prompt is filled in and a contact is selected the 'send' button will become usable.
+Clicking the send button will create a new conversation and take the user to the newly created conversation.

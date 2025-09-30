@@ -1,0 +1,11 @@
+When the user opens the app they will see a list of conversations. Each conversation will show the avatar of the contact, the most recent message (possibly truncated) displayed alongside the timestamp of the most recent message. 
+*At the top right of the screen is a settings gear.
+At the bottom right of the screen is a plus icon. 
+
+*Clicking the gear will open a context menu that allows showing archived conversations.
+
+Clicking the plus icon will open the new conversation screen.
+
+Clicking any message will bring you to a history of your messages displayed in reverse chronological order. Unread messages are displayed in bold.
+
+*Holding on any of these conversations will reveal a context menu that allows the user to rename, archive, or delete the conversation from the list.
