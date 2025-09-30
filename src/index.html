@@ -2,8 +2,10 @@
 
 <html>
 <head>
+    <link href="main.css" rel="stylesheet"/>
     <script src="https://unpkg.com/inkjs@2.3.2/dist/ink.js"></script>
     <script src="story.js"></script>
+    <script src="main.js"></script>
 </head>
 <body>
     <div id="story"></div>
@@ -24,18 +26,31 @@
                 }
                 storyContainer.appendChild(p);
             }
-            story.currentChoices.forEach(c => {
-                var b = document.createElement("button");
-                b.value = c.text;
-                b.innerText = c.text;
-                b.setAttribute('data-index',c.index);
-                storyContainer.appendChild(b);
-                b.addEventListener("click",e=>{
-                    story.ChooseChoiceIndex(e.target.getAttribute('data-index'));
-                    continueStory();
+            if(story.currentChoices.length>0){
+                var container = document.createElement('ul');
+                container.className='choices';
+                story.currentChoices.forEach(c => {
+                    var b = document.createElement("button");
+                    b.className='choice';
+                    b.value = c.text;
+                    b.innerText = c.text;
+                    b.setAttribute('data-index',c.index);
+                    var li = document.createElement('li');
+                    li.appendChild(b);
+                    container.appendChild(li);
+                    b.addEventListener("click",e=>{
+                        console.log(e);
+                        story.ChooseChoiceIndex(e.target.getAttribute('data-index'));
+                        e.target.setAttribute("disabled",true);
+                        console.log(e.target.closest('.choices'));
+                        Array.from(e.target.closest('.choices').getElementsByClassName("choice")).forEach(c=>{
+                            c.classList.add('not-chosen');
+                        })
+                        continueStory();
+                    });
                 });
-            });
-            storyContainer.append(document.createElement('br'));
+                storyContainer.append(container);
+            }
         }
         continueStory();
         var $ = {
@@ -82,6 +97,8 @@
                         return;
                     }
                     var i = document.createElement('input');
+                    i.type='text';
+                    i.className='capture';
                     storyContainer.append(i);
                     i.addEventListener('change',(e)=>{
                         action(e.target.value)

@@ -1,0 +1,24 @@
+#story{
+    max-width: 750px;
+}
+
+.choices{
+    display:inline-block;
+    list-style-type: none;
+}
+
+button.choice{
+    width: 100%;
+    display:block;
+}
+
+button.choice.not-chosen{
+    display:none;
+}
+button.choice.not-chosen[disabled]{
+    display:block;
+}
+
+input.capture{
+    display: block;
+}
