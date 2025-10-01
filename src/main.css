@@ -5,6 +5,7 @@
 .choices{
     display:inline-block;
     list-style-type: none;
+    margin-right: 100%;
 }
 
 button.choice{

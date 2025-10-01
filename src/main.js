@@ -1,9 +1,11 @@
-//will have to change for cordova
-//for now I'll just hardcode it
-//will probably need to use the import function
+var storyContainer = document.getElementById('story');
+var story;
+var current;
+
 var act = {
     modules : {}
 }
+//will have to change for cordova
 
 async function fetchModule(module){
     act.modules[module]= {...(await import(`./modules/${module}/custom.js`))};//the ./ at the beginning is required
@@ -22,11 +24,10 @@ async function fetchModule(module){
     xmlhttp.send();    
 }
 
+//will have to change for cordova, hardcoded for now
 fetchModule('test');
 fetchModule('test2');
 
-var story;
-var current;
 function loadStory(module){
     current = act.modules[module];
     story = new inkjs.Story(current.storyContent);
@@ -34,47 +35,90 @@ function loadStory(module){
 
 }
 
-var storyContainer = document.getElementById('story');
+function createStoryLine(text){
+    /*
+    <p class='story-line'>${text}</p>
+    */
+    var p = document.createElement('p');
+    p.className = 'story-line';
+    p.innerText = text;
+    return p;
+}
+
+function createOptions(choices,click){
+    /*
+    <ul class='choices'>
+        ... options go here
+    </ul>
+    */
+    var container = document.createElement('ul');
+    container.className='choices';
+    choices.forEach(c => {
+        container.appendChild(createOption(c.text,c.index,click));
+    });
+    return container;  
+}
+
+function createOption(text,index,click){
+    /*
+    <li>
+        <button class="choice" onclick=${click} value="${text}" data-index="${index}">${text}</button>
+    </li>
+    */
+    var li = document.createElement('li');
+    var b = document.createElement("button");
+    b.className='choice';
+    b.value = text;
+    b.innerText = text;
+    b.setAttribute('data-index',index);
+    li.appendChild(b);
+    if(click){
+        b.addEventListener("click",click);
+    }
+    return li;
+}
+
+
+function createList(choices,click){
+    /*
+    <ul class='list'>
+        ... options go here
+    </ul>
+    */
+    var container = document.createElement('ul');
+    container.className='choices';
+    choices.forEach(c => {
+        container.appendChild(createOption(c,0,click));
+    });
+    return container;  
+}
 
 function continueStory(){
-    var lastTags = [];
     while(story.canContinue){
-        var p = document.createElement('p');
-        p.innerText = story.Continue();
-        lastTags = story.currentTags;
-        console.log(lastTags);
-        if(lastTags.length > 0){
-            processTags(lastTags[0]);
+        var p = createStoryLine(story.Continue());
+        console.log(p);
+        var tags = story.currentTags;
+        console.log(tags);
+        if(tags.length > 0){
+            processTags(tags[0]);
             return;
         }
         storyContainer.appendChild(p);
     }
     if(story.currentChoices.length>0){
-        var container = document.createElement('ul');
-        container.className='choices';
-        story.currentChoices.forEach(c => {
-            var b = document.createElement("button");
-            b.className='choice';
-            b.value = c.text;
-            b.innerText = c.text;
-            b.setAttribute('data-index',c.index);
-            var li = document.createElement('li');
-            li.appendChild(b);
-            container.appendChild(li);
-            b.addEventListener("click",e=>{
-                console.log(e);
-                story.ChooseChoiceIndex(e.target.getAttribute('data-index'));
-                e.target.setAttribute("disabled",true);
-                console.log(e.target.closest('.choices'));
-                Array.from(e.target.closest('.choices').getElementsByClassName("choice")).forEach(c=>{
-                    c.classList.add('not-chosen');
-                })
-                continueStory();
-            });
-        });
+        var click = e=>{
+            story.ChooseChoiceIndex(e.target.getAttribute('data-index'));
+            e.target.setAttribute("disabled",true);
+            Array.from(e.target.closest('.choices').getElementsByClassName("choice")).forEach(c=>{
+                c.classList.add('not-chosen');
+            })
+            continueStory();
+        };
+        var container = createOptions(story.currentChoices,click);
         storyContainer.append(container);
     }
 }
+//only a function so I can return early rather than using a bunch of nested ifs
 function processTags(tagsraw){
     var command;
     var command_param;
@@ -127,14 +171,8 @@ function processTags(tagsraw){
                 console.error(`could not find variable ${command_param}`);
                 return;
             }
-            current.variables[command_param].forEach(l=>{
-                var b = document.createElement("button");
-                b.value = l;
-                b.innerText = l;
-                b.setAttribute('data-index',0);
-                storyContainer.appendChild(b);
-                b.addEventListener("click",action);
-            });
+            var list = createList(current.variables[command_param],action);
+            storyContainer.appendChild(list);
             return;
         case 'run':
             if(!current.hasOwnProperty(command_param)){
@@ -142,29 +180,38 @@ function processTags(tagsraw){
                 return
             }
             current[command_param]();
+            continueStory();
             return;
     }
 }
+/*
+ACTIONS HERE
+*/
 function set(target){
     return (val)=>{
         current.variables[target]=val;
+        continueStory();
     }
 }
 
 function setInk(target){
     return (val)=>{
         story.variablesState[target]=val;
+        console.log(val);
+        continueStory();
     }
 }
 
 function append(target){
     return (val)=>{
         current.variables[target].push(val.target.value);
+        continueStory();
     }
 }
 function remove(target){
     return (val)=>{
         current.variables[target].splice(current.variables[target].indexOf(val.target.value),1);
+        continueStory();
     }
 }
 

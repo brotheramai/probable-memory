@@ -1,28 +1,33 @@
-VAR test= ""
+VAR test= "wow"
 ->Start
 ===Start===
 Once upon a time...
- * I wanted to test capture -> capture
- * I wanted to test capture ink -> capture_ink
- * I wanted to test list -> list
- * I wanted to test run -> run
+ * [I wanted to test capture]
+ -> capture
+ * [I wanted to test capture ink] 
+ -> capture_ink
+ * [I wanted to test list]
+ -> list
+ * [I wanted to test run]
+ -> run
  
 = capture
-#capture set priority
- * -> end 
+ prepare for capture
+ !#capture set priority
+ -> end 
  
 = capture_ink
-#capture set_ink test
-T{test}T
- * -> end 
+ !#capture set_ink test 
+ T{test}T
+ -> end 
 
 = list
-#list(priorities) remove priorities
- * -> end 
+ !#list(priorities) remove priorities
+ -> end 
 
 = run
-#run(test) 
- * -> end 
+!#run(test) 
+-> end 
 
 = end
 They lived happily ever after.
