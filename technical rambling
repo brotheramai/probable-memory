@@ -17,3 +17,43 @@ all of this makes me think that maybe ink isn't worth it. In the end I really sh
 nevermind, I can use cordova/electron to get this app wherever I need it without issue (and while using html, css, and javascript, and therefore inkjs is still on the table as an option.)
 
 also, I bet cordova has a built in webserver so I can undo my www-data changes
+yup, it does, but it makes copies of your files, so you have to re-run the server whenever you make a change
+and as an added stupidity it opens a new tab each time too.
+
+but yeah, the other problem I'm having is that I don't have a good way to find out which bots are available.
+long term I'm going to need to have a notion of a bot and specific conversations with that bot
+
+I had the idea of a contact list that you could search through to start conversations from.
+
+Ok, so here is my core issue. If I load them from the internet then I can have some sort of api that says "here's what's availiable", but ideally I'd want to be able to download them, but I don't know how to do that for a browser since file support is so shitty.
+
+If I'm willing to ditch custom functions then I could save everything as json in whatever storage I am allowed.
+
+Maybe I should release a desktop app rather than a browser app. That would ease a lot of constraints.
+If I were going to make a browser app I would just have to get a server involved.
+So maybe I do a limited, hardcoded 'try me below' in the github?
+
+So I need to decide if I want to continue on the android app route. Probably, no? I mean, I definitely want to test it on my phone.
+
+
+Ok, but what about updates? Do I want to do a whole build every time I update a bot?
+nope.
+
+Plus, I want to allow loading bots from 'off-reservation'
+so I need a way to just get new stuff whenever.
+But that should be fine using downloads.
+
+Ok, so problem again. The file plugin is ALSO restricted in terms of where you can read/write from.
+So for now I think I need to pivot to loading everything as json and just not have custom functions.
+Otherwise I have to figure out how to load javascript and execute it from a directory other than the application directory.
+Maybe that's fine though?
+Obviously having custom functions is way more powerful, but it's also way more dangerous.
+So yeah, let's say ditch that for now.
+
+So I just have to stop using the cordova browser platform (and maybe come back for the 'try me' section)
+
+Yeah, but the android platform requires like a whole bunch of stuff
+
+Like, also though, I can run cordova in one terminal and then use 'cordova prepare' to update files.
+It's still a two-step process, but way less bad than before!
+at least for browser. Don't know if it works for electron yet.

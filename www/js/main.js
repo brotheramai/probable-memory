@@ -3,7 +3,41 @@ var story;
 var current;
 var modules = {};
 
-//will have to change for cordova
+function loadModules(){
+    console.log('loading modules');
+    window.resolveLocalFileSystemURL(cordova.file.dataDirectory,function(dir){
+        console.log(dir.fullPath);
+        dir.getDirectory('modules',{create: true}, function(modules){
+            console.log(modules.fullpath);
+            modules.createReader().readEntries(function(entries){
+                entries.forEach(e=>{ 
+                    if(e.isDirectory){
+                        modules[e.name] = {};
+                        e.getFile('data.json',function(f){
+                            f.file(function(f2){
+                                var reader = new FileReader(f2);
+                                reader.onload = function(){
+                                    modules[e.name].data = JSON.parse(reader.result);
+                                }
+                            });
+                        });
+                        e.getFile('story.json',function(f){
+                            f.file(function(f2){
+                                var reader = new FileReader(f2);
+                                reader.onload = function(){
+                                    modules[e.name].story = JSON.parse(reader.result);
+                                    console.log(modules);
+                                }
+                            });
+                        });
+                    }
+                });
+            });
+        });
+    },function(error){console.error(error)});
+}
+
+function loadConversations(){}
 
 async function fetchModule(module){
     modules[module]= {...(await import(`./modules/${module}/custom.js`))};//the ./ at the beginning is required
@@ -13,12 +47,13 @@ async function fetchModule(module){
     var res = await fetch(`js/modules/${module}/story.json`);
     modules[module].storyContent = await res.text();
     return b;
-    
 }
 
 async function initialize(id){
     storyContainer = document.getElementById(id);
     //will have to change for cordova, hardcoded for now
+    loadModules();
+    loadConversations();
     var module_buttons = document.createElement("ul");
     module_buttons.appendChild(await fetchModule('test'));
     module_buttons.appendChild(await fetchModule('test2'));

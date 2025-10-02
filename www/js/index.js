@@ -26,7 +26,9 @@ function onDeviceReady() {
 
     console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
     document.getElementById('deviceready').classList.add('ready');
-    import(`./main.js`).then(act=>{
-        act.initialize('story');
-    });
+    // window.addEventListener('filePluginIsReady',function(){
+        import(`./main.js`).then(act=>{
+            act.initialize('story');
+        });
+    // });
 }
