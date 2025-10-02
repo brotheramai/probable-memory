@@ -1,35 +1,32 @@
-var storyContainer = document.getElementById('story');
+var storyContainer;
 var story;
 var current;
+var modules = {};
 
-var act = {
-    modules : {}
-}
 //will have to change for cordova
 
 async function fetchModule(module){
-    act.modules[module]= {...(await import(`./modules/${module}/custom.js`))};//the ./ at the beginning is required
-
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("GET", `modules/${module}/story.js`);
-    xmlhttp.onreadystatechange = function()
-    {
-        if ((xmlhttp.status == 200) && (xmlhttp.readyState == 4))
-        {
-            eval(xmlhttp.responseText);
-            console.log(storyContent);
-            act.modules[module].storyContent = storyContent;
-        }
-    };
-    xmlhttp.send();    
+    modules[module]= {...(await import(`./modules/${module}/custom.js`))};//the ./ at the beginning is required
+    var b = document.createElement("button");
+    b.innerText=module;
+    b.addEventListener("click",()=>loadStory(module));
+    var res = await fetch(`js/modules/${module}/story.json`);
+    modules[module].storyContent = await res.text();
+    return b;
+    
 }
 
-//will have to change for cordova, hardcoded for now
-fetchModule('test');
-fetchModule('test2');
+async function initialize(id){
+    storyContainer = document.getElementById(id);
+    //will have to change for cordova, hardcoded for now
+    var module_buttons = document.createElement("ul");
+    module_buttons.appendChild(await fetchModule('test'));
+    module_buttons.appendChild(await fetchModule('test2'));
+    storyContainer.insertAdjacentElement("beforebegin",module_buttons);
+}
 
 function loadStory(module){
-    current = act.modules[module];
+    current = modules[module];
     story = new inkjs.Story(current.storyContent);
     continueStory();
 
@@ -252,3 +249,4 @@ function processAction(action, target){
             return remove(target);
     }
 }
+export {initialize}
