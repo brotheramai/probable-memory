@@ -179,8 +179,7 @@ function save(){
 var halt = false;
 function continueStory(){
     while(story.canContinue){
-        var p = createStoryLine(story.Continue());
-        console.log(p);
+        var text = story.Continue();
         var tags = story.currentTags;
         console.log(tags);
         tags.forEach(t=>{
@@ -191,6 +190,8 @@ function continueStory(){
             return;
         }
         if(tags.length==0){
+            var p = createStoryLine(text);
+            console.log(p);
             storyContainer.appendChild(p);
         }
     }
