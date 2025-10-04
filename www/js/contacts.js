@@ -25,5 +25,36 @@ function onDeviceReady() {
     // Cordova is now initialized. Have fun!
 
     console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
-    document.getElementById('deviceready').classList.add('ready');
+    loadModules();    
+}
+
+async function loadModules(){
+    console.log('loading modules');
+    var openRequest = window.indexedDB
+    var modsList = document.getElementById('contacts');
+    var h = await(await fetch('http://localhost:8080')).text();
+    var m = h.matchAll(/.*?<td.*?<a href.*?>(.*?)<.*/g);
+    m.forEach(async(p)=>{
+        p = p[1];
+        p = p.slice(0,p.length-1);
+        var li = document.createElement('li');
+        var b = document.createElement('button');
+        b.value = p;
+        b.innerText = p;
+        if(window.localStorage.getItem(p)){
+            b.setAttribute('disabled','')
+        }
+        b.addEventListener('click',function(e){
+            fetch(`http://localhost:8080/${p}/story.json`).then(a=>{
+                a.text().then(j=>{
+                    window.localStorage.setItem(p,j);
+                    e.target.setAttribute("disabled",'');
+                });
+            });
+            
+        });
+        li.appendChild(b);
+        modsList.appendChild(li);
+    });
+
 }

@@ -9,7 +9,7 @@ I can also probably also extend ink by just checking anything it returns for my 
 Better yet, ink supports 'tagging' which does nothing in the engine, but you can get the tags out of the engine.
 
 So perhaps a grammar like
-command(param?) result_action target
+value_producing_command(param)? resulting_action_that_takes_said_value target
 so for example
 # capture set priority
 means present a text box and save the result into the 'priority' variable
@@ -19,8 +19,18 @@ means present a set of choices based on the 'priorities' list (kept outside of i
 means present a textbox and add the result to the priorities list
 # list(priorities) remove priorities
 means present the list of priorities as options and remove whichever is selected from the priorities list
-# run(function)
-means run a js function named function
+# create(list) set priorities
+means create variable called 'priorities' with value []
+# lval set priority
+means set 'priority' to a blank list
+# val(a) append priorities
+means provide the value 'a' then append it to the priorities list
+# val create whatever
+means create a variable called whatever and do not set a value
 
 Another thing to consider is if I want to just use inkjs for the whole thing or if I want to use it for each conversation and build the non-conversation parts in js directly?
 Considering how much custom stuff I'm building already I don't know if it'd be worth it.
+
+DEPRECATED (because cordova makes it way easier to load JSON than javascript, plus that's way safer anyway)
+# run(function)
+means run a js function named function

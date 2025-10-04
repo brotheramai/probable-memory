@@ -57,3 +57,17 @@ Yeah, but the android platform requires like a whole bunch of stuff
 Like, also though, I can run cordova in one terminal and then use 'cordova prepare' to update files.
 It's still a two-step process, but way less bad than before!
 at least for browser. Don't know if it works for electron yet.
+
+if I'm killing custom functions then maybe I could define the variables in the story as well?
+it looks like multiple tags get 'lumped together' so if I rewrite tag handling to process all tags then it should be fine
+
+
+Ok, so here's how I think I'll lay things out (for now)
+
+index.html
+    pulls list of conversations from indexedDB
+    allows opening a conversation
+    links to contacts.html
+contacts.html
+    pulls list of modules from webserver
+    allows adding a contact (which adds them to indexedDB)

@@ -1,4 +1,9 @@
 VAR test= "wow"
+# lval() create priorities
+# val(a) append priorities
+# val(b) append priorities
+# val(c) append priorities
+!# val() create priority
 ->Start
 ===Start===
 Once upon a time...
@@ -17,7 +22,8 @@ Once upon a time...
  -> end 
  
 = capture_ink
- !#capture set_ink test 
+ !#capture set_ink test
+ !#save
  T{test}T
  -> end 
 
