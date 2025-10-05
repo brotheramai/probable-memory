@@ -21,9 +21,44 @@
 // See https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
 document.addEventListener('deviceready', onDeviceReady, false);
 
+const dbname = "act";
+const cnvname = "conversations";
+
+var db;
+var a;
+
 function onDeviceReady() {
     // Cordova is now initialized. Have fun!
 
     console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
-    document.getElementById('deviceready').classList.add('ready');
+    var req = window.indexedDB.open(dbname,3);
+    req.onsuccess = e =>{
+        console.log('db open');
+        db = req.result 
+        loadConversations();
+    }
+}
+function loadConversations(){
+    var ul = document.getElementById('conversations');
+    const trans = db.transaction([cnvname]);
+    var req = trans.objectStore(cnvname).openCursor();
+    req.onsuccess = e =>{
+        const c = e.target.result;
+        if(c){
+            ul.appendChild(createConversation(c.key,c.value));
+            c.continue();
+        }
+        else{
+            
+        }
+    }   
+}
+
+function createConversation(id,cnv){
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.setAttribute('href',`conversation.html?cnv=${id}`);
+    a.innerText = `${cnv.topic}(${cnv.contact})`;
+    li.appendChild(a);
+    return li;
 }
