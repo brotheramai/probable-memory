@@ -23,3 +23,7 @@ button.choice.not-chosen[disabled]{
 input.capture{
     display: block;
 }
+
+p.user{
+    text-align:right;
+}

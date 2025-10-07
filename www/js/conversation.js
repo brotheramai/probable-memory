@@ -75,7 +75,12 @@ function beginConversation(id){
                 cnv.topic = e.target.value;
                 save();
             });
-
+            cnv.history.forEach(h=>{
+                var p = createStoryLine(h.p,true);
+                console.log(p);
+                p.classList.add(h.bot?'bot':'user');
+                storyContainer.appendChild(p);
+            })
             loadStory(cnv.contact);
         }
     }
@@ -129,17 +134,25 @@ function loadStory(module){
 
 }
 
-function createStoryLine(text){
+function createStoryLine(text,keepOutOfHistory=false){
     /*
     <p class='story-line'>${text}</p>
     */
     var p = document.createElement('p');
     p.clacsName = 'story-line';
     p.innerText = text;
+    if(!keepOutOfHistory){
+        cnv.history.push(
+            {
+                bot: true,
+                p: text
+            }
+        );
+    }
     return p;
 }
 
-function createOptions(choices,click){
+function createOptions(choices,click,keepOutOfHistory=false){
     /*
     <ul class='choices'>
         ... options go here
@@ -147,8 +160,18 @@ function createOptions(choices,click){
     */
     var container = document.createElement('ul');
     container.className='choices';
+    var finalClick = click;
     choices.forEach(c => {
-        container.appendChild(createOption(c.text,c.index,click));
+        if(!keepOutOfHistory){
+            finalClick = function(e){
+                cnv.history.push({
+                    bot: false,
+                    p: c.text
+                })
+                click(e);
+            }
+        }
+        container.appendChild(createOption(c.text,c.index,finalClick));
     });
     return container;  
 }
@@ -284,7 +307,13 @@ function processTags(tagsraw){
             i.className='capture';
             storyContainer.append(i);
             i.addEventListener('change',(e)=>{
-                action(e.target.value)
+                e.target.setAttribute("disabled","");
+                action(e.target.value);
+                cnv.history.push({
+                    bot:false,
+                    p:e.target.value
+                })
+                save();
                 continueStory();
             });
             halt = true;
