@@ -169,3 +169,24 @@ Providing owning text for each:
 !# save
 ```
 works as expected and not coincidentally is exactly what "the simple way" suggests.
+
+
+
+story.state.ToJson() and story.state.LoadJson(json) for saving and loading
+maybe need to switch to external functions
+	in every story at the top we would need to have:
+	EXTERNAL functionName(paramName)
+	and I can't seem to make an easy included ink file
+	then I need to call story.BindExternalFunction('func name', function definition)
+	and then it can be called using
+	~ functionName('param')
+story.ChoosePathString('knot.stitch')    so now I need to figure out how to know the path
+	might not matter because the state contains the current path
+I think I need to save each time you make a choice since I want the history anyway
+	might as well check the variables and save them at the same time
+	
+So what would my external functions look like
+	capture(target_ink_param?)
+	list(list_name)
+	append(list_name,val)
+	remove(list_name,val)

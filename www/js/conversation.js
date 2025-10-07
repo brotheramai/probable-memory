@@ -10,6 +10,9 @@ var modules = {};
 var cnv;
 var cnvid;
 
+var newCnvReq;
+var pendingSaveRequest = false;
+
 document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady() {
@@ -27,7 +30,7 @@ function initialize(id){
         beginConversation(id);
     }
     req.onupgradeneeded = e =>{
-        db = e.target.result;
+        d = e.target.result;
         db.deleteObjectStore(cnvname);
         const cnvs = db.createObjectStore(cnvname, { autoIncrement: true});
     }
@@ -71,7 +74,7 @@ function beginConversation(id){
             topic.addEventListener("change",function(e){
                 cnv.topic = e.target.value;
                 save();
-            })
+            });
 
             loadStory(cnv.contact);
         }
@@ -83,13 +86,25 @@ function createConversation(contact,topic){
         topic : topic,
         contact : contact,
         history : [],
+        state : '',
         data : {},
         ink_data : {}
     }
     const trans = db.transaction([cnvname],"readwrite");
+    console.log('saving new cnv');
     var req = trans.objectStore(cnvname).add(cnv);
+    newCnvReq = req;
     req.onsuccess = e =>{
-        cnvid = e.target.result
+        console.log(e);
+        cnvid = e.target.result;
+        newCnvReq = undefined;
+        if(pendingSaveRequest){
+            save();
+        }
+        console.log(cnvid);
+    }
+    req.onerror = e =>{
+        console.log(e);
     }
 }
 
@@ -105,6 +120,11 @@ function loadStory(module){
             story.variablesState.SetGlobal(k,cnv.ink_data[k]);
         }
     }
+    if(cnv.state !== ''){
+        console.log('loading state');
+        story.state.LoadJson(cnv.state);
+    }
+
     continueStory();
 
 }
@@ -168,11 +188,23 @@ function createList(choices,click){
 }
 
 function save(){
+    if(newCnvReq !== undefined){
+        console.log('pending save');
+        pendingSaveRequest = true;
+        return;
+    }
     const trans = db.transaction([cnvname],'readwrite');
     console.log(`saving cnv ${cnvid}`)
     var req = trans.objectStore(cnvname).put(cnv,cnvid);
     req.onsuccess = e => {
         console.log('cnv saved');
+        if(req === newCnvReq){
+            newCnvReq = undefined;
+        }
+        if(pendingSaveRequest){
+            pendingSaveRequest = false;
+            save();
+        } 
     };
 }
 
@@ -196,6 +228,8 @@ function continueStory(){
         }
     }
     console.log(story.currentChoices);
+    cnv.state = story.state.ToJson();
+    save();
     if(story.currentChoices.length>0){
         var click = e=>{
             story.ChooseChoiceIndex(e.target.getAttribute('data-index'));
@@ -378,7 +412,7 @@ function processAction(action, target){
             }
             return remove(target);
         case 'create':
-            if(cnv.data.has(target)){
+            if(cnv.data.hasOwnProperty(target)){
                 console.log(`refusing to recreate ${target} `);
                 return;
             }
