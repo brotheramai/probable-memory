@@ -1,37 +1,38 @@
 VAR test= "wow"
-!# 
- # lval() create priorities
- # val(a) append priorities
- # val(b) append priorities
- # val(c) append priorities
- # val() create priority
-!#
 ->Start
 ===Start===
 Once upon a time...
- * [I wanted to test capture]
- -> capture
- * [I wanted to test capture ink] 
+ * [I wanted to test capture] 
  -> capture_ink
- * [I wanted to test list]
- -> list
-
+ * [I wanted to test making a list]
+ > createList(priorities)
+ -> superlist
+ 
 = capture
  prepare for capture
- !#capture set priority
+ >capture(priority)
  -> end 
  
 = capture_ink
  T{test}T
- !#capture set_ink test
- !#save
+ >capture(test)
  T{test}T
  -> end 
 
-= list
- !t#list(priorities) remove priorities
- -> end 
-
+= superlist
+ * [add to list]
+ > capture()
+ > append(priorities,_input)
+ -> superlist
+ * [remove from list]
+ > list(priorities)
+ > remove(priorities,_input)
+ -> superlist
+ * [display list]
+ > list(priorities)
+ -> superlist
+ * I'm done
+ -> end
 = end
  * wow
 They lived happily ever after.

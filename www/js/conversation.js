@@ -13,6 +13,15 @@ var cnvid;
 var newCnvReq;
 var pendingSaveRequest = false;
 
+const commandMap = new Map([
+    ['capture',processCapture],
+    ['list',processList],
+    ['append',processAppend],
+    ['remove',processRemove],
+    ['createList',processCreate]
+]);
+
+
 document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady() {
@@ -59,7 +68,7 @@ function beginConversation(id){
     //load existing conversation
     else{
         const trans = db.transaction([cnvname]);
-        cnvid = parseInt(params.get(cnv_param));
+        cnvid = parseInt(params.get(c_param));
         console.log(`loading cnv ${cnvid}`)
         var req = trans.objectStore(cnvname).get(cnvid);
         req.onsuccess = e => {
@@ -204,8 +213,12 @@ function createList(choices,click){
     */
     var container = document.createElement('ul');
     container.className='choices';
+    var finalClick = function(e){
+        click(e.target.value);
+        continueStory();
+    }
     choices.forEach(c => {
-        container.appendChild(createOption(c,0,click));
+        container.appendChild(createOption(c,0,finalClick));
     });
     return container;  
 }
@@ -231,26 +244,22 @@ function save(){
     };
 }
 
-var halt = false;
 function continueStory(){
     while(story.canContinue){
-        var text = story.Continue();
-        var tags = story.currentTags;
-        console.log(tags);
-        tags.forEach(t=>{
-            processTags(t);
-        });
-        if(halt){
-            halt = false;
-            return;
+        var text = story.Continue().trim();
+        if(text.startsWith('>')){
+            var halt = false;
+            halt = processCommand(text);
+            if(halt){
+                halt = false;
+                return;
+            }
         }
-        if(tags.length==0){
+        else{
             var p = createStoryLine(text);
-            console.log(p);
             storyContainer.appendChild(p);
         }
     }
-    console.log(story.currentChoices);
     cnv.state = story.state.ToJson();
     save();
     if(story.currentChoices.length>0){
@@ -266,185 +275,118 @@ function continueStory(){
         storyContainer.append(container);
     }
 }
-//only a function so I can return early rather than using a bunch of nested ifs
-function processTags(tagsraw){
-    var command;
-    var command_param
-    var action;
-    var target;
-    (tagsraw => {
-        var tags = tagsraw.split(' ');
-    
-        if(tags.length<1){
-            return;
-        }
-        var params = tags[0].matchAll(/(.*?)\((.*?)\)/g).next();
-        if(params.value){
-            command = params.value[1];
-            command_param = params.value[2];
-        }
-        else{
-            command = tags[0];
-        }
-        if(tags.length<2){
-            return;
-        }
-        action = tags[1];
-        if(tags.length<3){
-            return;
-        }
-        target = tags[2];
-    })(tagsraw);
-    var action = processAction(action,target);
-    switch(command){
-        case 'capture':
-            if(command_param){
-                console.error(`invalid argument ${command_param}, capture takes no arguments`);
-                return;
-            }
-            var i = document.createElement('input');
-            i.type='text';
-            i.className='capture';
-            storyContainer.append(i);
-            i.addEventListener('change',(e)=>{
-                e.target.setAttribute("disabled","");
-                action(e.target.value);
-                cnv.history.push({
-                    bot:false,
-                    p:e.target.value
-                })
-                save();
-                continueStory();
-            });
-            halt = true;
-            return;
-        case 'list':
-            if(!command_param){
-                console.error('list requires an argument');
-                return;
-            }
-            if(!cnv.data.hasOwnProperty(command_param)){
-                console.error(`could not find variable ${command_param}`);
-                return;
-            }
-            var list = createList(cnv.data[command_param],action);
-            storyContainer.appendChild(list);
-            halt = true;
-            return;
-        case 'lval':
-            var val = [];
-            if(!action){
-                console.error(`cannot ${action} to ${target}`);
-            }
-            action(val);
-            return;
-        case 'val':
-            var val = command_param;
-            if(!action){
-                console.error(`cannot ${action} to ${target}`);
-            }
-            action(val);
-            return;
-        case 'save':
-            //save global ink variables
-            console.log('saving ink variables');
-            story.variablesState._globalVariables.forEach((v,k)=>{
-                cnv.ink_data[k]=v.value;
-            });
-            //persist to db
-            save();
-            return;
-        // case 'run':
-        //     if(!current.hasOwnProperty(command_param)){
-        //         console.error(`no such function ${command_param}`);
-        //         return
-        //     }
-        //     current[command_param]();
-        //     continueStory();
-        //     return;
-        default:
-            console.error(`refusing to process unknown command ${command}`)
+
+function processCapture(params){
+    if(params.length > 1){
+        console.error(`capture takes at most one param, passed ${params}`);
+        return;
     }
+    var i = document.createElement('input');
+    i.type='text';
+    i.className='capture';
+    if(params.length > 0 && params[0].length > 0){
+        i.setAttribute('data-target',params[0]);
+    }
+    else{
+        i.setAttribute('data-target','_input');
+    }
+    storyContainer.append(i);
+    i.addEventListener('change',(e)=>{
+        e.target.setAttribute("disabled","");
+        if(e.target.getAttribute('data-target')!==''){
+            console.log(e);
+            setInk(e.target.getAttribute('data-target'))(e.target.value);
+        }
+        cnv.history.push({
+            bot:false,
+            p:e.target.value
+        })
+        save();
+        continueStory();
+    });
+    return true;
 }
-/*
-ACTIONS HERE
-*/
-function set(target){
-    return (val)=>{
-        cnv.data[target]=val;
+
+function processList(params){
+    if(params.length > 2){
+        console.error('list takes at most two arguments');
+        return;
     }
+    if(params.length == 0){
+        console.error('list requires at least one argument');
+        return;
+    }
+    if(!cnv.data.hasOwnProperty(params[0])){
+        console.error(`could not find list ${params[0]}`);
+        return;
+    }
+    console.log(params);
+    var target = '_input';
+    if(params.length > 1){
+        target = params[1];
+    } 
+    var list = createList(cnv.data[params[0]],setInk(target));
+    storyContainer.appendChild(list);
+    return true;
+}
+
+function processAppend(params){
+    if(params.length != 2){
+        console.error('append requires two parameters, the name of a list and the value to append');
+        return;
+    }
+    if(!cnv.data.hasOwnProperty(params[0])){
+        console.error(`could not find list ${params[0]}`);
+        return;
+    }
+    cnv.data[params[0]].push(story.variablesState.GetVariableWithName(params[1]).value);
+}
+
+function processRemove(params){
+    console.log(`remove ${params}`)
+    if(params.length != 2){
+        console.error('remove requires two parameters, the name of a list and the value to remove');
+        return;
+    }
+    if(!cnv.data.hasOwnProperty(params[0])){
+        console.error(`could not find list ${params[0]}`);
+        return;
+    }
+    cnv.data[params[0]].splice(cnv.data[params[0]].indexOf(params[1]),1);
+}
+
+function processCreate(params){
+    if(params.length != 1){
+        console.error('createList requires one parameter, the name of the list to create');
+    }
+    if(cnv.data.hasOwnProperty(params[0])){
+        console.error(`list ${params[0]} already exists, refusing to create`);
+        return;
+    }
+    cnv.data[params[0]] = [];
+}
+
+function processCommand(text){
+    // function(param1,target)
+    var command;
+    var param_list = [];
+    var params = text.matchAll(/>(.*?)\((.*?)\)/g).next();
+    if(params.value){
+        command = params.value[1].trim();
+        param_list = params.value[2].trim().split(',');
+    }
+    param_list = param_list.map(x=>x.trim());
+    if(commandMap.has(command)){
+        return commandMap.get(command)(param_list);
+    }
+    console.error(`unknown command ${command}`);
+    
 }
 
 function setInk(target){
     return (val)=>{
+        console.log(`setting ${target} to ${val}`)
         story.variablesState[target]=val;
         console.log(val);
-    }
-}
-
-function create(target){
-    return (val)=>{
-        cnv.data[target]=val;
-    }
-}
-
-function append(target){
-    return (val)=>{
-        if(val instanceof Event){
-            val = val.target.value;
-        }
-        cnv.data[target].push(val);
-    }
-}
-function remove(target){
-    return (val)=>{
-        if(val instanceof Event){
-            val = val.target.value;
-        }
-        cnv.data[target].splice(cnv.data[target].indexOf(val),1);
-    }
-}
-
-function processAction(action, target){
-    switch(action){
-        case 'set':
-            if(!cnv.data.hasOwnProperty(target)){
-                console.error(`invalid target ${target} for set action`);
-                return;
-            }
-            return set(target);
-        case 'set_ink':
-            if(story.variablesState[target]==null){
-                console.error(`invalid target ${target} for set_ink action`);
-                return;
-            }
-            return setInk(target);
-        case 'append':
-            if(!cnv.data.hasOwnProperty(target)){
-                console.error(`invalid target ${target} for append action`);
-                return;
-            }
-            if(!('push' in cnv.data[target])){
-                console.error(`${target} is not a valid target. append must target a list`);
-                return;
-            }
-            return append(target);
-        case 'remove':
-            if(!cnv.data.hasOwnProperty(target)){
-                console.error(`invalid target ${target} for remove action`);
-                return;
-            }
-            if(!('splice' in cnv.data[target] &&
-                ('indexOf' in cnv.data[target]))){
-                console.error(`${target} is not a valid target. remove must target a list`);
-                return;
-            }
-            return remove(target);
-        case 'create':
-            if(cnv.data.hasOwnProperty(target)){
-                console.log(`refusing to recreate ${target} `);
-                return;
-            }
-            return create(target);
     }
 }

@@ -1,0 +1,4 @@
+display only lists (possibly as either one per line or as csv)
+disabling list selections after selection
+fallback for empty lists
+also need to test optional parameters everywhere they're allowed
